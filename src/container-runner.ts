@@ -237,15 +237,13 @@ function buildContainerArgs(
   const hostUid = process.getuid?.();
   const hostGid = process.getgid?.();
   if (hostUid != null && hostUid !== 0 && hostUid !== 1000) {
-    if (isMain) {
-      // Main containers start as root so the entrypoint can mount --bind
-      // to shadow .env. Privileges are dropped via setpriv in entrypoint.sh.
-      args.push('-e', `RUN_UID=${hostUid}`);
-      args.push('-e', `RUN_GID=${hostGid}`);
-    } else {
-      args.push('--user', `${hostUid}:${hostGid}`);
-    }
-    args.push('-e', 'HOME=/home/node');
+    // All containers start as root so the entrypoint can add a /etc/passwd
+    // entry for the host uid and create a writable home dir before dropping
+    // privileges via setpriv. This avoids "uid has no passwd entry" errors
+    // in SSH, git, and other tools that call getpwuid().
+    args.push('-e', `RUN_UID=${hostUid}`);
+    args.push('-e', `RUN_GID=${hostGid}`);
+    args.push('-e', 'HOME=/home/hostuser');
   }
 
   for (const mount of mounts) {
