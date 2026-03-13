@@ -158,7 +158,10 @@ function buildVolumeMounts(
     fs.mkdirSync(agentsDst, { recursive: true });
     for (const agentFile of fs.readdirSync(agentsSrc)) {
       if (!agentFile.endsWith('.md')) continue;
-      fs.copyFileSync(path.join(agentsSrc, agentFile), path.join(agentsDst, agentFile));
+      fs.copyFileSync(
+        path.join(agentsSrc, agentFile),
+        path.join(agentsDst, agentFile),
+      );
     }
   }
   mounts.push({
