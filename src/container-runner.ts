@@ -28,6 +28,10 @@ import {
 import { detectAuthMode } from './credential-proxy.js';
 import { validateAdditionalMounts } from './mount-security.js';
 import { RegisteredGroup } from './types.js';
+import { readEnvFile } from './env.js';
+
+// Third-party API keys read once from .env at startup
+const thirdPartyEnv = readEnvFile(['GEMINI_API_KEY', 'OLLAMA_HOST']);
 
 // Sentinel markers for robust output parsing (must match agent-runner)
 const OUTPUT_START_MARKER = '---NANOCLAW_OUTPUT_START---';
@@ -146,6 +150,17 @@ function buildVolumeMounts(
       fs.cpSync(srcDir, dstDir, { recursive: true });
     }
   }
+
+  // Sync agents from container/agents/ into each group's .claude/agents/
+  const agentsSrc = path.join(process.cwd(), 'container', 'agents');
+  const agentsDst = path.join(groupSessionsDir, 'agents');
+  if (fs.existsSync(agentsSrc)) {
+    fs.mkdirSync(agentsDst, { recursive: true });
+    for (const agentFile of fs.readdirSync(agentsSrc)) {
+      if (!agentFile.endsWith('.md')) continue;
+      fs.copyFileSync(path.join(agentsSrc, agentFile), path.join(agentsDst, agentFile));
+    }
+  }
   mounts.push({
     hostPath: groupSessionsDir,
     containerPath: '/home/hostuser/.claude',
@@ -226,6 +241,14 @@ function buildContainerArgs(
     args.push('-e', 'ANTHROPIC_API_KEY=placeholder');
   } else {
     args.push('-e', 'CLAUDE_CODE_OAUTH_TOKEN=placeholder');
+  }
+
+  // Pass third-party API keys into the container for MCP servers
+  if (thirdPartyEnv.GEMINI_API_KEY) {
+    args.push('-e', `GEMINI_API_KEY=${thirdPartyEnv.GEMINI_API_KEY}`);
+  }
+  if (thirdPartyEnv.OLLAMA_HOST) {
+    args.push('-e', `OLLAMA_HOST=${thirdPartyEnv.OLLAMA_HOST}`);
   }
 
   // Runtime-specific args for host gateway resolution
@@ -378,7 +401,7 @@ export async function runContainerAgent(
       const lines = chunk.trim().split('\n');
       for (const line of lines) {
         if (!line) continue;
-        if (line.includes('[OLLAMA]')) {
+        if (line.includes('[OLLAMA]') || line.includes('[GEMINI]')) {
           logger.info({ container: group.folder }, line);
         } else {
           logger.debug({ container: group.folder }, line);

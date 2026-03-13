@@ -411,7 +411,8 @@ async function runQuery(
         'TodoWrite', 'ToolSearch', 'Skill',
         'NotebookEdit',
         'mcp__nanoclaw__*',
-        'mcp__ollama__*'
+        'mcp__ollama__*',
+        'mcp__gemini__*'
       ],
       env: sdkEnv,
       permissionMode: 'bypassPermissions',
@@ -430,6 +431,13 @@ async function runQuery(
         ollama: {
           command: 'node',
           args: [path.join(path.dirname(mcpServerPath), 'ollama-mcp-stdio.js')],
+        },
+        gemini: {
+          command: 'node',
+          args: [path.join(path.dirname(mcpServerPath), 'gemini-mcp-stdio.js')],
+          env: {
+            GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
+          },
         },
       },
       hooks: {
