@@ -18,13 +18,15 @@ Call `mcp__ollama__ollama_list_models` first to get the model name, then `mcp__o
 
 **Use Gemini** (`mcp__gemini__gemini_generate`) when:
 - The user asks to search the web, look something up, or find current information — pass `search: true`
+- **Any finance-related task**: stock analysis, portfolio review, market research, fund analysis, financial planning, reading financial files — delegate all analysis work to Gemini
 - The task involves analysing large files, long transcripts, or many documents at once
 - A compact summary has already been generated this session (session is long — offload standalone questions)
 - The input would exceed ~50K tokens / ~200KB of text (e.g. pasting a large document)
 - A second model opinion would be valuable
 
 For web searches always pass `search: true` to get real-time Google results.
-Default model: `gemini-3.0-flash`. Use `gemini-2.5-pro` only for complex reasoning on very large context.
+For finance tasks: use `gemini_generate` with `search: true` for live market data. Use `gemini-2.5-pro` for deep financial analysis requiring large context.
+Default model: `gemini-3.0-flash`.
 If Gemini fails, fall back to answering yourself.
 
 **Use Claude (yourself)** for everything else:
