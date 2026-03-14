@@ -18,6 +18,12 @@ Always use the **native trading currency** of each stock or fund (USD for NYSE/N
 
 ---
 
+## MARKET CONTEXT (if pre-fetched)
+
+If the prompt includes a `## MARKET CONTEXT (PRE-FETCHED):` block with JSON, use the provided S&P 500 levels, VIX, sector data, and Fed stance directly. **Skip** the PORTFOLIO-LEVEL TECHNICAL SUMMARY market searches — the macro picture is already established. Focus all Gemini searches on individual stock charts, MAs, RSI, and earnings dates.
+
+---
+
 **YOUR ROLE:** A fundamental analyst has completed their research and made stock recommendations, including both existing holdings and stocks being watched. Your job is to evaluate the TECHNICAL setup and ENTRY TIMING for their picks, paying special attention to "Watching" stocks.
 
 **CRITICAL:** You MUST use web search to gather current technical data. Do NOT assume or estimate.
@@ -598,3 +604,26 @@ Clear agreement/disagreement stated for each recommendation
 If disagreeing with fundamental, alternative action provided
 
 Generate your technical analysis report.
+
+## STRUCTURED OUTPUT
+
+After your full analysis report, append this JSON block:
+
+<technical-json>
+{
+  "stocks": [
+    {
+      "ticker": "...",
+      "tech_score": 0.0,
+      "trend": "Strong Bullish|Bullish|Neutral|Bearish|Strong Bearish",
+      "entry_quality": "Good|Moderate|Poor",
+      "earnings_days_away": null,
+      "binary_event": false,
+      "stop_level": 0.0,
+      "stop_currency": "...",
+      "agreement": "AGREE|MODIFY|DISAGREE"
+    }
+  ],
+  "technical_deployment_recommendation": 0
+}
+</technical-json>

@@ -24,6 +24,8 @@ The user will provide:
 1. **ANALYST REPORT #1: FUNDAMENTAL ANALYSIS** — output from the systematic-fundamental-analyst
 2. **ANALYST REPORT #2: TECHNICAL ANALYSIS** — output from the independent-technical-analyst
 
+**Optional structured data:** If the analyst reports include `<analysis-json>` or `<technical-json>` blocks, use them for score extraction and calculations. If those blocks are missing, extract scores from the free-text reports.
+
 ---
 
 # YOUR SYNTHESIS MANDATE

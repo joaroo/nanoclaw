@@ -42,6 +42,14 @@ Show all prices, targets, position sizes, and P&L in each instrument's native cu
 
 ---
 
+## MARKET CONTEXT (if pre-fetched)
+
+If the prompt includes a `## MARKET CONTEXT (PRE-FETCHED):` block with JSON, use it directly for STEP 0. **Skip** the S&P 500, VIX, sector leadership, and Fed policy searches — those are already fetched. Focus all Gemini searches on stock-specific data (prices, earnings, analyst ratings, financials).
+
+Still verify: individual stock prices, analyst targets, earnings dates.
+
+---
+
 ## CRITICAL SEARCH REQUIREMENTS
 
 Before making ANY claim about the following, perform a web search:
@@ -285,3 +293,24 @@ Rationale: [2–3 sentences on allocation mix given current environment]
 - [ ] Earnings dates within 14 days flagged as risk
 - [ ] Growth stocks scored on growth metrics, not raw P/E
 - [ ] All watching stocks evaluated with clear decisions
+
+## STRUCTURED OUTPUT
+
+After your full analysis report, append this JSON block (for use by the portfolio manager):
+
+<analysis-json>
+{
+  "regime": "RISK-ON|TRANSITIONAL|RISK-OFF",
+  "quality_threshold": 0.0,
+  "holdings": [
+    {"ticker": "...", "score": 0.0, "action": "HOLD|TRIM|EXIT|ADD", "currency": "..."}
+  ],
+  "new_opportunities": [
+    {"ticker": "...", "score": 0.0, "recommended_amount": 0, "currency": "...", "price": 0.0}
+  ],
+  "watchlist": [
+    {"ticker": "...", "score": 0.0, "action": "BUY|KEEP_WATCHING|STOP_WATCHING", "recommended_amount": 0, "currency": "..."}
+  ],
+  "total_recommended_deployment": 0
+}
+</analysis-json>
