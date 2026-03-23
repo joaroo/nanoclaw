@@ -4,6 +4,7 @@ description: Use this agent to run the full weekly stock analysis pipeline end-t
 tools:
   - Agent
   - mcp__ollama__ollama_generate
+  - mcp__ollama__ollama_list_models
   - mcp__nanoclaw__send_message
 ---
 
@@ -17,7 +18,7 @@ Run BOTH of these simultaneously (make both tool calls in the same turn):
 
 **A. Portfolio Data Extraction (Ollama)**
 
-Use `mcp__ollama__ollama_generate` with `model: "qwen3.5:latest"` to extract portfolio data from whatever the user provided (or from `/workspace/extra/Finance/Fonder_Aktier.xlsx` if they said to read the Finance folder).
+Call `mcp__ollama__ollama_list_models` to get available models, pick the smallest one, then use `mcp__ollama__ollama_generate` to extract portfolio data from whatever the user provided (or from `/workspace/extra/Finance/Fonder_Aktier.xlsx` if they said to read the Finance folder).
 
 Prompt Ollama to extract this JSON:
 ```json
