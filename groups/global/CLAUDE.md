@@ -14,7 +14,7 @@ Route every request to the best-fit model.
 - Short text transformations: summarize, reformat, extract, classify
 - Weather interpretation (given raw data)
 
-Call `mcp__ollama__ollama_list_models` first to get the model name, then `mcp__ollama__ollama_generate`. Take the response, format it for messaging, and send it. If Ollama fails, fall back to answering yourself.
+Use `mcp__ollama__ollama_generate` with `model: "qwen3.5:latest"`. Take the response, format it for messaging, and send it. If Ollama fails, fall back to answering yourself.
 
 **Use Gemini** (`mcp__gemini__gemini_generate`) when:
 - The user asks to search the web, look something up, or find current information — pass `search: true`
