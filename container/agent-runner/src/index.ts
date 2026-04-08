@@ -23,7 +23,6 @@ import {
   PreCompactHookInput,
 } from '@anthropic-ai/claude-agent-sdk';
 import { fileURLToPath } from 'url';
-import { SessionOptimizer } from './session-optimizer.js';
 
 interface ContainerInput {
   prompt: string;
@@ -379,7 +378,6 @@ async function runQuery(
   containerInput: ContainerInput,
   sdkEnv: Record<string, string | undefined>,
   resumeAt?: string,
-  optimizer?: SessionOptimizer,
 ): Promise<{
   newSessionId?: string;
   lastAssistantUuid?: string;
@@ -514,7 +512,6 @@ async function runQuery(
         ? `system/${(message as { subtype?: string }).subtype}`
         : message.type;
     log(`[msg #${messageCount}] type=${msgType}`);
-    optimizer?.onMessage(message);
 
     if (message.type === 'assistant' && 'uuid' in message) {
       lastAssistantUuid = (message as { uuid: string }).uuid;
@@ -543,14 +540,12 @@ async function runQuery(
       resultCount++;
       const textResult =
         'result' in message ? (message as { result?: string }).result : null;
-      const processedResult =
-        textResult && optimizer ? optimizer.processResult(textResult) : textResult;
       log(
-        `Result #${resultCount}: subtype=${message.subtype}${processedResult ? ` text=${processedResult.slice(0, 200)}` : ''}`,
+        `Result #${resultCount}: subtype=${message.subtype}${textResult ? ` text=${textResult.slice(0, 200)}` : ''}`,
       );
       writeOutput({
         status: 'success',
-        result: processedResult || null,
+        result: textResult || null,
         newSessionId,
       });
     }
@@ -802,19 +797,6 @@ async function main(): Promise<void> {
     prompt = `[SCHEDULED TASK]\n\nScript output:\n${JSON.stringify(scriptResult.data, null, 2)}\n\nInstructions:\n${containerInput.prompt}`;
   }
 
-  // Session optimizer: inline compaction, length control, CLAUDE.md compression
-  const optimizer = new SessionOptimizer('/workspace/group');
-
-  // Prepend compact seed from previous session (only on first prompt)
-  const seed = optimizer.getInitialContext();
-  if (seed) {
-    log('Loading compact seed as initial context');
-    prompt = `<prior_context>\n${seed}\n</prior_context>\n\n${prompt}`;
-  }
-
-  // Inject optimizer instructions and account for initial prompt bytes
-  optimizer.trackPromptBytes(prompt);
-  prompt = optimizer.injectInstructions(prompt);
 
 
   // Query loop: run query → wait for IPC message → run new query → repeat
@@ -832,7 +814,6 @@ async function main(): Promise<void> {
         containerInput,
         sdkEnv,
         resumeAt,
-        optimizer,
       );
       if (queryResult.newSessionId) {
         sessionId = queryResult.newSessionId;
@@ -862,8 +843,7 @@ async function main(): Promise<void> {
       }
 
       log(`Got new message (${nextMessage.length} chars), starting new query`);
-      optimizer.trackPromptBytes(nextMessage);
-      prompt = optimizer.injectInstructions(nextMessage);
+      prompt = nextMessage;
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
