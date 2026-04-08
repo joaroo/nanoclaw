@@ -133,12 +133,12 @@ describe('cleanupOrphans', () => {
     expect(mockExecSync).toHaveBeenNthCalledWith(
       2,
       `${CONTAINER_RUNTIME_BIN} stop -t 1 nanoclaw-group1-111`,
-      { stdio: 'pipe', timeout: 5000 },
+      { stdio: 'pipe' },
     );
     expect(mockExecSync).toHaveBeenNthCalledWith(
       3,
       `${CONTAINER_RUNTIME_BIN} stop -t 1 nanoclaw-group3-333`,
-      { stdio: 'pipe', timeout: 5000 },
+      { stdio: 'pipe' },
     );
     expect(logger.info).toHaveBeenCalledWith(
       { count: 2, names: ['nanoclaw-group1-111', 'nanoclaw-group3-333'] },
